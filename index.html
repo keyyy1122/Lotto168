@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>คีย์หวยแยกบ้าน - กดเลขขึ้นซ้ายอัตโนมัติ</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Tahoma,sans-serif;background:linear-gradient(90deg,#5f1005,#b85f1e,#5f1005)}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+.app{max-width:540px;margin:0 auto;min-height:100vh;background:#fff;display:flex}
+.side{width:142px;background:#20252d;color:#fff;padding:8px 6px;overflow:auto}
+.sideBtn{width:100%;border:0;border-radius:8px;padding:9px 3px;margin-bottom:8px;color:#fff;font-weight:900}
+.price{background:#9d262b}.view{background:#ff8d24;color:#111}.check{background:#168b50}.limitBtn{background:#1679f2}.clearAll{background:#555}
+.sideTitle{color:#ff8d24;font-size:22px;font-weight:900;border-bottom:2px dashed #ff8d24;padding-bottom:7px}
+.badge{background:#fff;color:#111;border-radius:10px;text-align:center;margin:12px auto;padding:7px;width:92px;font-weight:900}
+.group{margin:16px 0}.groupTitle{display:inline-block;background:#1679f2;color:#fff;border-radius:8px;padding:7px 10px;font-size:15px;font-weight:900;margin-bottom:8px}
+.draftRow{display:grid;grid-template-columns:24px 1fr 24px;align-items:center;gap:4px;margin:9px 0;font-size:23px;color:#fff}
+.draftRow .num{font-size:26px}.draftRow .amt{font-size:12px;color:#ffe176}.draftRow button{background:transparent;border:0;color:#fff;font-size:30px;padding:0}
+.main{flex:1;padding:10px;overflow:auto}
+.name,.houseSelect{width:100%;border:2px solid #c91f2e;border-radius:8px;padding:11px;text-align:center;font-size:17px;font-weight:900;margin-bottom:8px;background:white}
+.houseSelect{border-color:#1679f2;color:#1679f2}
+.head{width:100%;border:0;border-radius:10px;background:linear-gradient(#f13d4a,#ca202c);color:#fff8d9;padding:13px;font-size:22px;font-weight:900;margin-bottom:9px}
+.mode{width:100%;border:2px solid #c91f2e;background:#fff;color:#c91f2e;border-radius:8px;padding:12px;font-size:20px;font-weight:900;margin-bottom:10px;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.type{border:0;border-radius:8px;min-height:50px;color:white;font-size:17px;font-weight:900;display:flex;justify-content:space-between;align-items:center;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.type span{align-self:stretch;min-width:46px;background:#fff;color:inherit;display:flex;align-items:center;justify-content:center}
+.type:active{transform:translateY(6px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.type.selected{outline:3px solid #ffcf33;filter:brightness(.92)}
+.red{background:#df3145}.blue{background:#1379f2}.green{background:#168b50}.black{background:#20252d!important}
+.extra{margin-top:12px;background:#bfc4c8;border-radius:8px;padding:9px}
+.extraTitle{color:white;font-weight:900;font-size:18px;margin-bottom:8px}
+.extraGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.extraGrid button{border:0;border-radius:6px;padding:10px;color:white;font-weight:900;font-size:15px}
+.exRed{background:#df3145}.exBlue{background:#1379f2}.exCyan{background:#22c1d6}.exGreen{background:#168b50}.exYellow{background:#ffc107;color:#222!important}
+.panel{margin-top:12px;border:2px solid #ddd;background:#fafafa;padding:10px;text-align:center}
+.panel h3{margin:2px 0 10px;font-size:22px}.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:34px}
+.chip{background:#1679f2;color:#fff;border-radius:8px;padding:6px 10px;font-weight:900;font-size:15px}
+.digits{display:flex;justify-content:center;gap:12px;margin:30px 0 15px}
+.digit{width:50px;height:58px;border:2px solid #df3145;background:#fff;font-size:29px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.keypad button{border:2px solid #d52a38;background:#fff;color:#d52a38;border-radius:9px;font-size:20px;font-weight:900;padding:14px 0;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.action{width:100%;border:0;border-radius:9px;background:#df3145;color:#fff;padding:13px;margin-top:10px;font-size:20px;font-weight:900}
+.summary{background:#20252d;color:#fff;border-radius:8px;padding:11px;margin-top:12px;line-height:1.8}
+.profit{color:#38d96f;font-weight:900}.loss{color:#ff5252;font-weight:900}.yellow{color:#ffe176;font-weight:900}
+.bottom{position:sticky;bottom:0;background:#fff;padding-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.saved{margin-top:10px;border:1px solid #ddd;border-radius:8px;padding:8px;background:#fffdf5;font-size:13px}
+.saved h4{margin:0 0 6px;color:#c91f2e}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:99;display:none;align-items:center;justify-content:center;padding:14px}
+.modal.show{display:flex}.box{width:100%;max-width:470px;max-height:90vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.boxHead{height:58px;background:#df242f;color:#fff8d9;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:24px;font-weight:900;position:sticky;top:0;z-index:2}
+.close{border:0;background:transparent;color:#fff8d9;font-size:42px}.boxBody{padding:14px}
+.boxBody input,.boxBody select{width:100%;border:2px solid #ddd;border-radius:8px;padding:13px;text-align:center;font-size:18px;font-weight:900;background:white}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.amountBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:13px}
+.amountBtns button{border:2px solid #df242f;background:#fff;color:#df242f;border-radius:8px;padding:10px 0;font-size:20px;font-weight:900}
+.modalActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.modalActions button{border:0;border-radius:8px;color:#fff;padding:13px;font-size:19px;font-weight:900}
+.cancel{background:#df3145}.confirm{background:#168b50}
+.priceRows{max-height:390px;overflow:auto;border-top:1px solid #eee;margin-top:8px}
+.priceRow{display:grid;grid-template-columns:34px 54px 1fr 58px;gap:6px;align-items:center;border-bottom:1px solid #eee;padding:7px 0}
+.priceRow .tag{background:#159052;color:white;border-radius:5px;padding:8px 0;text-align:center;font-weight:900}
+.priceRow input{padding:10px!important;font-size:17px!important}
+.eqBox{margin-top:12px;text-align:center;border-top:1px solid #ddd;padding-top:10px}.eqLine{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.slipItem,.limitItem,.houseResult{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:13px}
+.slipItem button,.limitItem button{border:0;background:#df3145;color:#fff;border-radius:6px;padding:7px 10px;margin-left:4px}
+.resultList,.slipDetail,.limitList{max-height:320px;overflow:auto;border-top:1px solid #ddd;margin-top:10px;font-size:13px}
+.win{color:#168b50;font-weight:900}.lose{color:#777}.small{font-size:12px;color:#777;margin-top:8px;text-align:center}
+.report{display:none}
+@media print{
+  body{background:#fff}
+  .app,.modal{display:none!important}
+  .report{display:block!important;font-size:12px;color:#000}
+  .report h1,.report h2{text-align:center;margin:5px 0}
+  .report table{width:100%;border-collapse:collapse;margin-top:8px}
+  .report th,.report td{border:1px solid #333;padding:4px;text-align:center}
+  .report .sum{margin-top:10px;line-height:1.7;font-weight:bold}
+  .pageBreak{page-break-before:always}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <button type="button" class="sideBtn price" id="openPriceSide">✎ ใส่ราคา</button>
+    <button type="button" class="sideBtn limitBtn" id="openLimit">ตั้งอั้นเลข</button>
+    <button type="button" class="sideBtn check" id="openCheck">ตรวจผล</button>
+    <button type="button" class="sideBtn view" id="openSlips">ดูโพย</button>
+    <button type="button" class="sideBtn clearAll" id="clearStorage">ล้างข้อมูลเก่า</button>
+    <div class="sideTitle">รายการแทง</div>
+    <div class="badge"><span id="sideCount">0</span> รายการ</div>
+    <div id="leftList"></div>
+    <div style="font-size:13px;line-height:1.7;color:#f5e8ca;margin-top:10px">
+      บ้าน<br><b id="sideHouse">บ้านแม่</b><br>
+      ยอดขาย<br><b id="sideSale">0</b> บาท<br>
+      โพยถัดไป<br><b id="slipNo">1</b>
+    </div>
+  </aside>
+
+  <main class="main">
+    <input id="slipName" class="name" placeholder="ใส่ชื่อโพย เช่น ลูกค้า A">
+    <select id="houseSelect" class="houseSelect">
+      <option value="บ้านแม่">บ้านแม่ — 2ตัว 70 / โต๊ด 100 / 3บน 500</option>
+      <option value="บ้านย่า">บ้านย่า — 2ตัว 80 / โต๊ด 100 / 3บน 500</option>
+      <option value="บ้านแม่เหน่ง">บ้านแม่เหน่ง — 2ตัว 80 / โต๊ด 100 / 3บน 500</option>
+    </select>
+    <button type="button" class="head" id="openSlipsMain">👁 เปิดรายการแทง / ดูโพยบ้านนี้</button>
+    <button type="button" class="mode">กดเลขเอง</button>
+
+    <div class="grid">
+      <button type="button" class="type red" data-type="3ตัวบน" data-digits="3">3ตัวบน <span></span></button>
+      <button type="button" class="type red" data-type="3ตัวโต๊ด" data-digits="3">3ตัวโต๊ด <span></span></button>
+      <button type="button" class="type blue" data-type="2ตัวบน" data-digits="2">2ตัวบน <span></span></button>
+      <button type="button" class="type blue" data-type="2ตัวล่าง" data-digits="2">2ตัวล่าง <span></span></button>
+      <button type="button" class="type red" data-type="6กลับ" data-digits="3">6กลับ <span></span></button>
+      <button type="button" class="type blue" data-type="2ตัวกลับ" data-digits="2">2ตัวกลับ <span></span></button>
+    </div>
+
+    
+
+    <section class="panel">
+      <h3>รายการที่เลือก</h3>
+      <div class="chips" id="chips"></div>
+      <div class="digits" id="digitBoxes"></div>
+      <div class="keypad">
+        <button type="button" data-num="1">1</button><button type="button" data-num="2">2</button><button type="button" data-num="3">3</button>
+        <button type="button" data-num="4">4</button><button type="button" data-num="5">5</button><button type="button" data-num="6">6</button>
+        <button type="button" data-num="7">7</button><button type="button" data-num="8">8</button><button type="button" data-num="9">9</button>
+        <button type="button" id="randomBtn">สุ่มเลข</button><button type="button" data-num="0">0</button><button type="button" id="backBtn" class="black">⌫</button>
+      </div>
+      <button type="button" class="action" id="openPriceMain">ใส่ราคา</button>
+      <button type="button" class="action green" id="openCheckMain">ตรวจผล / กำไรขาดทุน</button>
+    </section>
+
+    <div class="summary">
+      บ้านปัจจุบัน: <span id="showHouse">บ้านแม่</span><br>
+      ชื่อโพย: <span id="showName">-</span><br>
+      ยอดขายโพยปัจจุบัน: <span id="sale">0</span> บาท<br>
+      รายการรอราคา: <span id="draftCountMain">0</span><br>
+      รายการมีราคา: <span id="count">0</span><br>
+      ค่าคนหา: <span id="finderFee" class="yellow">0</span> บาท (<span id="finderRate">0</span>%)<br>
+      ยอดหลังหักคนหา: <span id="netSale">0</span> บาท<br>
+      ยอดจ่ายล่าสุดบ้านนี้: <span id="lastPayout">0</span> บาท<br>
+      กำไร/ขาดทุนล่าสุดบ้านนี้: <span id="lastProfit" class="profit">0</span> บาท
+    </div>
+
+    <div class="bottom">
+      <button type="button" class="action" id="clearBtn">ล้างโพยนี้</button>
+      <button type="button" class="action green" id="sendBtn">✓ ส่งโพยบ้านนี้</button>
+    </div>
+    <div class="saved"><h4>โพยที่ส่งแล้วของบ้านนี้</h4><div id="savedList">ยังไม่มีโพยที่ส่ง</div></div>
+  </main>
+</div>
+
+<div class="modal" id="priceModal">
+  <div class="box">
+    <div class="boxHead"><div>½ ใส่ราคา <span id="modalDraftCount" style="font-size:14px;background:#fff8d9;color:#df242f;border-radius:12px;padding:4px 8px">0 รายการ</span></div><button type="button" class="close" id="closePrice">×</button></div>
+    <div class="boxBody">
+      <div class="center">บ้าน <span id="modalHouse">-</span></div>
+      <div class="priceRows" id="priceRows"></div>
+
+      <div class="eqBox">
+        <b>ราคา "เท่ากัน" ทั้งหมด</b>
+        <div class="eqLine">
+          <input id="equalAmount" type="number" placeholder="ใส่ราคา">
+          <button type="button" id="copyEqual" style="border:2px solid #168b50;background:white;color:#168b50;border-radius:8px;font-weight:900;padding:0 14px">คัดลอก</button>
+        </div>
+        <div class="amountBtns">
+          <button type="button" data-amt="5">5</button><button type="button" data-amt="10">10</button><button type="button" data-amt="20">20</button><button type="button" data-amt="50">50</button><button type="button" data-amt="100">100</button>
+        </div>
+        <div class="small">เลขขึ้นซ้ายก่อน แล้วค่อยใส่ราคาทีเดียว</div>
+      </div>
+
+      <div class="modalActions">
+        <button type="button" class="cancel" id="cancelPrice">ยกเลิก</button>
+        <button type="button" class="confirm" id="confirmPrice">บันทึกราคา</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="limitModal">
+  <div class="box">
+    <div class="boxHead"><div>ตั้งอั้นเลขแยกบ้าน</div><button type="button" class="close" id="closeLimit">×</button></div>
+    <div class="boxBody">
+      <select id="limitHouse">
+        <option value="บ้านแม่">บ้านแม่</option>
+        <option value="บ้านย่า">บ้านย่า</option>
+        <option value="บ้านแม่เหน่ง">บ้านแม่เหน่ง</option>
+      </select>
+      <select id="limitType" style="margin-top:10px">
+        <option value="สองตัวบน">สองตัวบน</option>
+        <option value="สองตัวล่าง">สองตัวล่าง</option>
+        <option value="สามตัวบน">สามตัวบน</option>
+        <option value="สามตัวโต๊ด">สามตัวโต๊ด</option>
+        <option value="หกกลับบน">หกกลับบน</option>
+        <option value="หกกลับล่าง">หกกลับล่าง</option>
+      </select>
+      <div class="row">
+        <input id="limitNumber" type="text" inputmode="numeric" placeholder="เลข">
+        <input id="limitMax" type="number" placeholder="ยอดอั้นสูงสุด">
+      </div>
+      <button type="button" class="action green" id="saveLimit">บันทึกอั้นเลข</button>
+      <div class="limitList" id="limitList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="checkModal">
+  <div class="box">
+    <div class="boxHead"><div>ตรวจผลแยกบ้าน</div><button type="button" class="close" id="closeCheck">×</button></div>
+    <div class="boxBody">
+      <div class="row">
+        <input id="result3" inputmode="numeric" maxlength="3" placeholder="3 ตัวบน">
+        <input id="result2bottom" inputmode="numeric" maxlength="2" placeholder="2 ตัวล่าง">
+      </div>
+      <button type="button" class="action green" id="checkResult">ตรวจผล / คำนวณแยกบ้าน</button>
+      <button type="button" class="action" id="printPdf">PDF ยอดถูกแยกบ้าน</button>
+      <div class="summary" style="margin-top:10px">
+        <div id="checkHouseSummary">ยังไม่ได้ตรวจผล</div>
+      </div>
+      <div class="resultList" id="winnerList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="slipsModal">
+  <div class="box">
+    <div class="boxHead"><div>ดูโพยบ้านนี้</div><button type="button" class="close" id="closeSlips">×</button></div>
+    <div class="boxBody">
+      <div id="slipsList"></div>
+      <div class="slipDetail" id="slipDetail"></div>
+    </div>
+  </div>
+</div>
+
+<div class="report" id="printReport"></div>
+
+<script>
+(() => {
+  const HOUSES = ["บ้านแม่","บ้านย่า","บ้านแม่เหน่ง"];
+  const houseRates = {
+    "บ้านแม่": {"3ตัวบน":500,"3ตัวโต๊ด":100,"2ตัวบน":70,"2ตัวล่าง":70,"6กลับ":100,"2ตัวกลับ":70},
+    "บ้านย่า": {"3ตัวบน":500,"3ตัวโต๊ด":100,"2ตัวบน":80,"2ตัวล่าง":80,"6กลับ":100,"2ตัวกลับ":80},
+    "บ้านแม่เหน่ง": {"3ตัวบน":500,"3ตัวโต๊ด":100,"2ตัวบน":80,"2ตัวล่าง":80,"6กลับ":100,"2ตัวกลับ":80}
+  };
+
+  const K_DATA="lotto_left_first_data_v1";
+  const K_HOUSE="lotto_left_first_current_v1";
+  let data = JSON.parse(localStorage.getItem(K_DATA) || "{}");
+  HOUSES.forEach(h => {
+    if(!data[h]) data[h] = {drafts:[], bets:[], slips:[], limits:[], lastResult:{sale:0,payout:0,fee:0,net:0,rate:0,profit:0}, lastRows:[]};
+    if(!data[h].drafts) data[h].drafts = [];
+  });
+
+  let currentHouse = localStorage.getItem(K_HOUSE) || "บ้านแม่";
+  let selected = [];
+  let number = "";
+
+  const $ = id => document.getElementById(id);
+  const priceModal = $("priceModal");
+  const limitModal = $("limitModal");
+  const checkModal = $("checkModal");
+  const slipsModal = $("slipsModal");
+  const houseSelect = $("houseSelect");
+  const name = $("slipName");
+  const equalAmount = $("equalAmount");
+
+  houseSelect.value = currentHouse;
+  houseSelect.onchange = () => {
+    currentHouse = houseSelect.value;
+    localStorage.setItem(K_HOUSE, currentHouse);
+    number = "";
+    updateRateButtons();
+    renderSelected();
+    renderDigits();
+    render();
+  };
+
+  function state(h=currentHouse){ return data[h]; }
+  function drafts(h=currentHouse){ return state(h).drafts; }
+  function bets(h=currentHouse){ return state(h).bets; }
+  function slips(h=currentHouse){ return state(h).slips; }
+  function limits(h=currentHouse){ return state(h).limits; }
+
+  function saveAll(){ localStorage.setItem(K_DATA, JSON.stringify(data)); render(); }
+
+  document.querySelectorAll(".type").forEach(btn => {
+    btn.onclick = () => {
+      const item = {type:btn.dataset.type, digits:Number(btn.dataset.digits)};
+      const idx = selected.findIndex(x => x.type === item.type);
+      if(idx >= 0){ selected.splice(idx,1); btn.classList.remove("selected"); }
+      else{ selected.push(item); btn.classList.add("selected"); }
+      number = "";
+      renderSelected();
+      renderDigits();
+    };
+  });
+
+  document.querySelectorAll("[data-num]").forEach(btn => btn.onclick = () => pressNum(btn.dataset.num));
+  $("backBtn").onclick = () => { number = number.slice(0,-1); renderDigits(); };
+  $("randomBtn").onclick = () => {
+    if(!selected.length) return alert("เลือกเมนูก่อน");
+    number = Array.from({length:maxDigits()}, () => Math.floor(Math.random()*10)).join("");
+    renderDigits();
+  };
+
+  $("openPriceSide").onclick = openPrice;
+  $("openPriceMain").onclick = openPrice;
+  $("closePrice").onclick = closePrice;
+  $("cancelPrice").onclick = closePrice;
+  $("confirmPrice").onclick = savePrices;
+  $("copyEqual").onclick = applyEqualAmount;
+
+  document.querySelectorAll("[data-amt]").forEach(btn => {
+    btn.onclick = () => {
+      equalAmount.value = btn.dataset.amt;
+      applyEqualAmount();
+    };
+  });
+
+  $("openLimit").onclick = openLimit;
+  $("closeLimit").onclick = () => limitModal.classList.remove("show");
+  $("saveLimit").onclick = saveLimit;
+
+  $("openCheck").onclick = openCheck;
+  $("openCheckMain").onclick = openCheck;
+  $("closeCheck").onclick = () => checkModal.classList.remove("show");
+  $("checkResult").onclick = checkResult;
+  $("printPdf").onclick = printPdfReport;
+
+  $("openSlips").onclick = openSlips;
+  $("openSlipsMain").onclick = openSlips;
+  $("closeSlips").onclick = () => slipsModal.classList.remove("show");
+
+  $("clearBtn").onclick = () => {
+    if(confirm(`ล้างโพยปัจจุบันของ ${currentHouse}?`)){
+      state().drafts = [];
+      state().bets = [];
+      saveAll();
+    }
+  };
+
+  $("sendBtn").onclick = sendSlip;
+
+  $("clearStorage").onclick = () => {
+    if(confirm("ล้างข้อมูลทุกบ้านทั้งหมด?")){
+      localStorage.removeItem(K_DATA);
+      localStorage.removeItem(K_HOUSE);
+      location.reload();
+    }
+  };
+
+  function getPay(type, h=currentHouse){ return Number(houseRates[h][type] || 0); }
+
+  function updateRateButtons(){
+    document.querySelectorAll(".type").forEach(btn => {
+      const type = btn.dataset.type;
+      const pay = getPay(type);
+      btn.dataset.pay = pay;
+      const span = btn.querySelector("span");
+      if(span){
+        if(type === "2ตัวกลับ" || type === "6กลับ") span.textContent = "↔ " + pay;
+        else span.textContent = pay;
+      }
+    });
+  }
+
+  function maxDigits(){
+    if(selected.some(x => x.digits === 3)) return 3;
+    if(selected.some(x => x.digits === 2)) return 2;
+    return 1;
+  }
+  function minDigits(){ return selected.length ? Math.min(...selected.map(x => x.digits)) : 0; }
+
+  function pressNum(n){
+    if(!selected.length) return alert("เลือกเมนูก่อน");
+    if(number.length < maxDigits()){
+      number += n;
+      renderDigits();
+
+      // กดเลขครบแล้ว เพิ่มเข้ารายการซ้ายอัตโนมัติ
+      if(number.length >= minDigits()){
+        addDrafts();
+      }
+    }
+  }
+
+  function renderSelected(){
+    $("chips").innerHTML = selected.length ? selected.map(x => `<span class="chip">${x.type}</span>`).join("") : `<span class="chip">ยังไม่ได้เลือก</span>`;
+  }
+
+  function renderDigits(){
+    const len = selected.length ? maxDigits() : 2;
+    $("digitBoxes").innerHTML = Array.from({length:len}, (_,i) => `<div class="digit">${number[i] || ""}</div>`).join("");
+  }
+
+  function perms(str){
+    if(!str) return [];
+    if(str.length <= 1) return [str];
+    const out = [];
+    for(let i=0; i<str.length; i++){
+      const rest = str.slice(0,i) + str.slice(i+1);
+      perms(rest).forEach(p => out.push(str[i] + p));
+    }
+    return [...new Set(out)];
+  }
+
+  function makeDraftRowsFromNumber(){
+    const pending = {};
+    function addPending(type, pay, num){
+      const key = type + "_" + num + "_" + pay;
+      if(!pending[key]) pending[key] = {id:String(Date.now()+Math.random()), type,pay,number:num,amount:0};
+    }
+
+    selected.forEach(sel => {
+      const n = sel.digits === 2 ? number.slice(-2) : number.slice(0,3);
+      if(n.length < sel.digits) return;
+      if(sel.type === "3ตัวบน") addPending("สามตัวบน",getPay("3ตัวบน"),n);
+      if(sel.type === "3ตัวโต๊ด") addPending("สามตัวโต๊ด",getPay("3ตัวโต๊ด"),n);
+      if(sel.type === "2ตัวบน") addPending("สองตัวบน",getPay("2ตัวบน"),n);
+      if(sel.type === "2ตัวล่าง") addPending("สองตัวล่าง",getPay("2ตัวล่าง"),n);
+      if(sel.type === "2ตัวกลับ"){
+        perms(n).forEach(x => {
+          addPending("สองตัวบน",getPay("2ตัวกลับ"),x);
+          addPending("สองตัวล่าง",getPay("2ตัวกลับ"),x);
+        });
+      }
+      if(sel.type === "6กลับ"){
+        perms(n).forEach(x => {
+          addPending("หกกลับบน",getPay("6กลับ"),x);
+          addPending("หกกลับล่าง",getPay("6กลับ"),x);
+        });
+      }
+    });
+    return Object.values(pending);
+  }
+
+  function addDrafts(){
+    if(!selected.length) return alert("เลือกเมนูก่อน");
+    if(number.length < minDigits()) return alert("กดเลขให้ครบก่อน");
+
+    const rows = makeDraftRowsFromNumber();
+    if(!rows.length) return alert("ไม่มีรายการ");
+
+    rows.forEach(r => {
+      const exist = drafts().find(d => d.type === r.type && d.number === r.number && d.pay === r.pay);
+      if(!exist) drafts().push(r);
+    });
+
+    number = "";
+    renderDigits();
+    saveAll();
+  }
+
+  window.deleteDraftByGroup = (type,num) => {
+    state().drafts = drafts().filter(d => !(d.type === type && d.number === num));
+    saveAll();
+  };
+
+  function limitKey(type, num){
+    if(type === "หกกลับบน" || type === "หกกลับล่าง") return type + ":" + perms(num).sort().join("");
+    return type + ":" + num;
+  }
+
+  function soldAmount(type, num, h=currentHouse){
+    const key = limitKey(type, num);
+    const pricedSold = bets(h).filter(b => limitKey(b.type,b.number) === key).reduce((s,b)=>s+Number(b.amount),0);
+    const sentSold = slips(h).flatMap(s => s.items || []).filter(b => limitKey(b.type,b.number) === key).reduce((s,b)=>s+Number(b.amount),0);
+    return pricedSold + sentSold;
+  }
+
+  function findLimit(type, num, h=currentHouse){
+    const key = limitKey(type, num);
+    return limits(h).find(l => l.key === key);
+  }
+
+  function canAccept(type, num, amount){
+    const limit = findLimit(type,num);
+    if(!limit) return {ok:true};
+    const sold = soldAmount(type,num);
+    const remain = Number(limit.max) - sold;
+    return {ok: amount <= remain, sold, remain, max:Number(limit.max)};
+  }
+
+  function addOrMerge(type,pay,num,amount){
+    const check = canAccept(type,num,amount);
+    if(!check.ok){
+      alert(`${currentHouse}\nเลข ${num} ${type} เกินอั้นแล้ว\nอั้น ${check.max.toLocaleString()} บาท\nซื้อมาแล้ว ${check.sold.toLocaleString()} บาท\nเหลือรับได้ ${Math.max(check.remain,0).toLocaleString()} บาท\nรายการนี้แทง ${amount.toLocaleString()} บาท`);
+      return false;
+    }
+    const arr = bets();
+    const found = arr.find(b => b.type === type && b.number === num && b.pay === pay);
+    if(found) found.amount += amount;
+    else arr.push({id:String(Date.now()+Math.random()), type,pay,number:num,amount,payout:0,win:false});
+    return true;
+  }
+
+  function openPrice(){
+    if(!drafts().length) return alert("ยังไม่มีรายการฝั่งซ้าย กดเพิ่มเข้ารายการก่อน");
+    $("modalHouse").textContent = currentHouse;
+    equalAmount.value = "";
+    renderPriceRows();
+    priceModal.classList.add("show");
+  }
+
+  function closePrice(){ priceModal.classList.remove("show"); }
+
+  function renderPriceRows(){
+    $("modalDraftCount").textContent = drafts().length + " รายการ";
+    $("priceRows").innerHTML = drafts().map((r,i) => `
+      <div class="priceRow">
+        <div>${i+1}</div>
+        <div class="tag">${r.number}</div>
+        <div><b>${r.type}</b><br><span style="font-size:12px;color:#1679f2">อัตราจ่าย ${r.pay}</span></div>
+        <input type="number" class="rowAmount" data-i="${i}" value="${r.amount || ""}" placeholder="ราคา">
+      </div>
+    `).join("");
+    document.querySelectorAll(".rowAmount").forEach(inp => {
+      inp.oninput = () => {
+        const i = Number(inp.dataset.i);
+        drafts()[i].amount = Number(inp.value || 0);
+        localStorage.setItem(K_DATA, JSON.stringify(data));
+      };
+    });
+  }
+
+  function applyEqualAmount(){
+    const v = Number(equalAmount.value || 0);
+    if(v <= 0) return alert("ใส่ราคาก่อน");
+    drafts().forEach(r => r.amount = v);
+    renderPriceRows();
+    localStorage.setItem(K_DATA, JSON.stringify(data));
+  }
+
+  function savePrices(){
+    if(!drafts().length) return alert("ไม่มีรายการให้ใส่ราคา");
+    let added = 0;
+    const remainDrafts = [];
+
+    for(const d of drafts()){
+      const amount = Number(d.amount || 0);
+      if(amount > 0){
+        if(addOrMerge(d.type,d.pay,d.number,amount)) added++;
+        else remainDrafts.push(d);
+      }else{
+        remainDrafts.push(d);
+      }
+    }
+
+    if(added <= 0) return alert("ใส่ราคาอย่างน้อย 1 รายการ");
+    state().drafts = remainDrafts;
+    closePrice();
+    saveAll();
+  }
+
+  function openLimit(){
+    $("limitHouse").value = currentHouse;
+    limitModal.classList.add("show");
+    renderLimits();
+  }
+
+  function saveLimit(){
+    const h = $("limitHouse").value;
+    const type = $("limitType").value;
+    const num = $("limitNumber").value.replace(/\D/g,"");
+    const max = Number($("limitMax").value || 0);
+    if(!num) return alert("ใส่เลขก่อน");
+    if(max <= 0) return alert("ใส่ยอดอั้นก่อน");
+    const key = limitKey(type,num);
+    const arr = limits(h);
+    const old = arr.find(l => l.key === key);
+    if(old) old.max = max;
+    else arr.push({key,type,number:num,max});
+    $("limitNumber").value = "";
+    $("limitMax").value = "";
+    saveAll();
+    renderLimits();
+    alert("บันทึกอั้นเลขแล้ว");
+  }
+
+  window.deleteLimit = (h,key) => {
+    state(h).limits = limits(h).filter(l => l.key !== key);
+    saveAll();
+    renderLimits();
+  };
+
+  function renderLimits(){
+    const all = HOUSES.flatMap(h => limits(h).map(l => ({...l, house:h})));
+    $("limitList").innerHTML = all.length ? all.map(l => {
+      const sold = soldAmount(l.type,l.number,l.house);
+      const remain = Number(l.max) - sold;
+      return `<div class="limitItem">
+        <div><b>${l.house}</b><br>${l.type} ${l.number}<br>อั้น ${Number(l.max).toLocaleString()} / ซื้อมาแล้ว ${sold.toLocaleString()} / เหลือ ${Math.max(remain,0).toLocaleString()}</div>
+        <button onclick="deleteLimit('${l.house}','${l.key}')">ลบ</button>
+      </div>`;
+    }).join("") : `<div style="padding:12px;text-align:center;color:#777">ยังไม่มีรายการอั้นเลข</div>`;
+  }
+
+  window.deleteBetByGroup = (type,num) => {
+    state().bets = bets().filter(b => !(b.type === type && b.number === num));
+    saveAll();
+  };
+
+  function finderRate(sale){
+    if(sale >= 500000) return 30;
+    if(sale >= 50000) return 25;
+    if(sale >= 10000) return 20;
+    return sale > 0 ? 15 : 0;
+  }
+  function commission(sale){
+    const rate = finderRate(sale);
+    const fee = sale * rate / 100;
+    return {rate, fee, net:sale-fee};
+  }
+  function totalSale(list){ return list.reduce((s,b)=>s+Number(b.amount),0); }
+
+  function sendSlip(){
+    if(drafts().length) return alert("ยังมีรายการที่ยังไม่ใส่ราคาอยู่ กดใส่ราคาก่อน");
+    if(!bets().length) return alert("ยังไม่มีรายการที่มีราคาในโพย");
+    const no = slips().length + 1;
+    const slipName = name.value.trim() || `โพยที่ ${no}`;
+    const total = totalSale(bets());
+    const com = commission(total);
+    slips().push({
+      no,name:slipName,total,finderRate:com.rate,finderFee:com.fee,netSale:com.net,
+      date:new Date().toLocaleString("th-TH"),items:JSON.parse(JSON.stringify(bets()))
+    });
+    state().bets = [];
+    saveAll();
+    alert(`ส่งโพย ${currentHouse} ที่ ${no} แล้ว\nยอดขาย ${total.toLocaleString()} บาท`);
+  }
+
+  function openCheck(){ checkModal.classList.add("show"); renderCheck(); }
+
+  function checkResult(){
+    const result3 = $("result3").value.trim();
+    const bottom2 = $("result2bottom").value.trim();
+    if(result3.length !== 3) return alert("ใส่ 3 ตัวบนให้ครบ");
+    if(bottom2.length !== 2) return alert("ใส่ 2 ตัวล่างให้ครบ");
+    const top2 = result3.slice(-2);
+
+    HOUSES.forEach(h => {
+      const savedItems = slips(h).flatMap(s => (s.items||[]).map(item => ({...item, slipNo:s.no, slipName:s.name})));
+      const currentItems = bets(h).map(item => ({...item, slipNo:"ยังไม่ส่ง", slipName:"โพยปัจจุบัน"}));
+      const all = [...savedItems,...currentItems];
+      let sale = 0, payout = 0;
+      const rows = [];
+      all.forEach(b => {
+        sale += Number(b.amount);
+        let win = false;
+        if(b.type === "สามตัวบน" && b.number === result3) win = true;
+        if(b.type === "สามตัวโต๊ด" && perms(result3).includes(b.number)) win = true;
+        if(b.type === "สองตัวบน" && b.number === top2) win = true;
+        if(b.type === "สองตัวล่าง" && b.number === bottom2) win = true;
+        if(b.type === "หกกลับบน" && b.number === result3) win = true;
+        if(b.type === "หกกลับล่าง" && b.number === bottom2) win = true;
+        const row = {...b, house:h, win, payout: win ? Number(b.amount)*Number(b.pay) : 0};
+        payout += row.payout;
+        rows.push(row);
+      });
+      const com = commission(sale);
+      state(h).lastResult = {sale,payout,fee:com.fee,net:com.net,rate:com.rate,profit:com.net-payout,result3,bottom2,date:new Date().toLocaleString("th-TH")};
+      state(h).lastRows = rows;
+    });
+    saveAll();
+    renderCheck();
+  }
+
+  function renderCheck(){
+    $("checkHouseSummary").innerHTML = HOUSES.map(h => {
+      const r = state(h).lastResult || {};
+      const profit = Number(r.profit || 0);
+      return `<div class="houseResult"><div><b>${h}</b><br>ยอดขาย ${Number(r.sale||0).toLocaleString()} | หัก ${Number(r.fee||0).toLocaleString()} (${r.rate||0}%)<br>ยอดหลังหัก ${Number(r.net||0).toLocaleString()} | จ่าย ${Number(r.payout||0).toLocaleString()}<br><span class="${profit>=0?'profit':'loss'}">กำไร/ขาดทุน ${profit.toLocaleString()}</span></div><div></div></div>`;
+    }).join("");
+
+    const allRows = HOUSES.flatMap(h => (state(h).lastRows||[]).map(r => ({...r, house:h})));
+    $("winnerList").innerHTML = allRows.length ? allRows.map(b => `
+      <div style="padding:7px;border-bottom:1px solid #eee" class="${b.win ? 'win' : 'lose'}">
+        ${b.house} | โพย ${b.slipNo} | ${b.type} ${b.number} แทง ${Number(b.amount).toLocaleString()}
+        ${b.win ? `ถูก จ่าย ${Number(b.payout).toLocaleString()}` : "ไม่ถูก"}
+      </div>`).join("") : "กดตรวจผลเพื่อดูรายการ";
+  }
+
+  function buildWinningRows(rows){
+    const summary = {};
+    rows.filter(b => b.win).forEach(b => {
+      const key = b.type + "|" + b.number;
+      if(!summary[key]) summary[key] = {type:b.type, number:b.number, buy:0, payout:0, count:0};
+      summary[key].buy += Number(b.amount);
+      summary[key].payout += Number(b.payout);
+      summary[key].count += 1;
+    });
+    return Object.values(summary).sort((a,b)=>b.payout-a.payout);
+  }
+
+  function printPdfReport(){
+    const hasResult = HOUSES.some(h => (state(h).lastRows||[]).length);
+    if(!hasResult) return alert("กดตรวจผลก่อน");
+    let html = `<h1>สรุปยอดถูกหวยรัฐบาล แยกบ้าน</h1>`;
+    HOUSES.forEach((h,idx) => {
+      const r = state(h).lastResult || {};
+      const rows = buildWinningRows(state(h).lastRows || []);
+      const profit = Number(r.profit || 0);
+      html += `<div class="${idx>0?'pageBreak':''}"><h2>${h}</h2><div>3 ตัวบน: <b>${r.result3||"-"}</b> &nbsp; 2 ตัวบน: <b>${r.result3?String(r.result3).slice(-2):"-"}</b> &nbsp; 2 ตัวล่าง: <b>${r.bottom2||"-"}</b></div>
+        ${rows.length ? `<table><thead><tr><th>ประเภท</th><th>เลข</th><th>ยอดซื้อที่ถูก</th><th>ยอดจ่ายรวม</th><th>ครั้ง</th></tr></thead><tbody>${rows.map(x => `<tr><td>${x.type}</td><td>${x.number}</td><td>${x.buy.toLocaleString()}</td><td>${x.payout.toLocaleString()}</td><td>${x.count}</td></tr>`).join("")}</tbody></table>` : `<p>ไม่มีรายการถูก</p>`}
+        <div class="sum">ยอดขาย: ${Number(r.sale||0).toLocaleString()} บาท<br>หักคนหา: ${Number(r.fee||0).toLocaleString()} บาท (${r.rate||0}%)<br>ยอดหลังหัก: ${Number(r.net||0).toLocaleString()} บาท<br>ยอดจ่ายถูกรวม: ${Number(r.payout||0).toLocaleString()} บาท<br>กำไร/ขาดทุน: ${profit.toLocaleString()} บาท</div></div>`;
+    });
+    $("printReport").innerHTML = html;
+    window.print();
+  }
+
+  function openSlips(){ slipsModal.classList.add("show"); renderSlipsModal(); }
+
+  window.viewSlip = no => {
+    const s = slips().find(x => x.no === no);
+    if(!s) return;
+    $("slipDetail").innerHTML = `<h3>${currentHouse} โพยที่ ${s.no} ${s.name}</h3><div>${s.date}</div><b>ยอดขาย ${Number(s.total).toLocaleString()} บาท</b><br>หักคนหา ${Number(s.finderFee||0).toLocaleString()} (${s.finderRate||0}%)<br>ยอดหลังหัก ${Number(s.netSale||s.total).toLocaleString()}${s.items.map((b,i) => `<div style="padding:6px;border-bottom:1px solid #eee">${i+1}. ${b.type} ${b.number} = ${Number(b.amount).toLocaleString()} ×${b.pay}</div>`).join("")}`;
+  };
+
+  window.deleteSlip = no => {
+    if(confirm(`ลบโพย ${currentHouse} ที่ ${no}?`)){
+      state().slips = slips().filter(s => s.no !== no);
+      saveAll();
+      renderSlipsModal();
+      $("slipDetail").innerHTML = "";
+    }
+  };
+
+  function renderSlipsModal(){
+    $("slipsList").innerHTML = slips().length ? slips().slice().reverse().map(s => `
+      <div class="slipItem"><div><b>${currentHouse} โพยที่ ${s.no}</b> ${s.name}<br>${s.date}<br>${s.items.length} รายการ / ${Number(s.total).toLocaleString()} บาท</div><div><button style="background:#1679f2" onclick="viewSlip(${s.no})">ดู</button><button onclick="deleteSlip(${s.no})">ลบ</button></div></div>
+    `).join("") : `ยังไม่มีโพยที่ส่งของ ${currentHouse}`;
+  }
+
+  function order(type){
+    const list = ["สองตัวบน","สองตัวล่าง","สามตัวบน","สามตัวโต๊ด","หกกลับบน","หกกลับล่าง"];
+    const idx = list.indexOf(type);
+    return idx < 0 ? 99 : idx;
+  }
+
+  function renderLeft(){
+    const items = [...drafts().map(x=>({...x,isDraft:true})), ...bets().map(x=>({...x,isDraft:false}))];
+    const groups = {};
+    items.forEach(b => {
+      if(!groups[b.type]) groups[b.type] = [];
+      groups[b.type].push(b);
+    });
+
+    $("leftList").innerHTML = Object.keys(groups).sort((a,b)=>order(a)-order(b)).map(type => `
+      <div class="group"><div class="groupTitle">${type}</div>
+        ${groups[type].map((b,i)=>`
+          <div class="draftRow">
+            <div>${i+1}.</div>
+            <div class="num">${b.number}<div class="amt">${b.isDraft?'รอราคา':Number(b.amount).toLocaleString()+' บ. ×'+b.pay}</div></div>
+            <button onclick="${b.isDraft ? `deleteDraftByGroup('${b.type}','${b.number}')` : `deleteBetByGroup('${b.type}','${b.number}')`}">×</button>
+          </div>`).join("")}
+      </div>`).join("") || `<div style="color:#ddd;font-size:12px;margin-top:12px">ยังไม่มีรายการ</div>`;
+  }
+
+  function renderSaved(){
+    $("savedList").innerHTML = slips().length ? slips().slice().reverse().slice(0,5).map(s => `
+      <div style="border-top:1px solid #ddd;padding:6px 0"><b>${currentHouse} โพยที่ ${s.no}</b> ${s.name}<br>${s.date}<br>${s.items.length} รายการ / ${Number(s.total).toLocaleString()} บาท</div>
+    `).join("") : `ยังไม่มีโพยที่ส่งของ ${currentHouse}`;
+  }
+
+  function render(){
+    const sale = totalSale(bets());
+    const com = commission(sale);
+    const lr = state().lastResult || {};
+    $("sideHouse").textContent = currentHouse;
+    $("showHouse").textContent = currentHouse;
+    $("sideCount").textContent = drafts().length + bets().length;
+    $("draftCountMain").textContent = drafts().length;
+    $("count").textContent = bets().length;
+    $("sale").textContent = sale.toLocaleString();
+    $("sideSale").textContent = sale.toLocaleString();
+    $("slipNo").textContent = slips().length + 1;
+    $("showName").textContent = name.value || "-";
+    $("finderFee").textContent = com.fee.toLocaleString();
+    $("finderRate").textContent = com.rate;
+    $("netSale").textContent = com.net.toLocaleString();
+    $("lastPayout").textContent = Number(lr.payout || 0).toLocaleString();
+    const pf = Number(lr.profit || 0);
+    $("lastProfit").textContent = pf.toLocaleString();
+    $("lastProfit").className = pf >= 0 ? "profit" : "loss";
+    renderLeft();
+    renderSaved();
+    renderLimits();
+  }
+
+  updateRateButtons();
+  renderSelected();
+  renderDigits();
+  render();
+})();
+</script>
+</body>
+</html>
