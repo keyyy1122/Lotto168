@@ -711,29 +711,57 @@ button{cursor:pointer}
     window.print();
   }
 
-  function openSlips(){ slipsModal.classList.add("show"); renderSlipsModal(); }
+  let selectedSlipNo = null;
 
-  window.viewSlip = no => {
-    const s = slips().find(x => x.no === no);
-    if(!s) return;
-    $("slipDetail").innerHTML = `<h3>${currentHouse} โพยที่ ${s.no} ${s.name}</h3><div>${s.date}</div><b>ยอดขาย ${Number(s.total).toLocaleString()} บาท</b><br>หักคนหา ${Number(s.finderFee||0).toLocaleString()} (${s.finderRate||0}%)<br>ยอดหลังหัก ${Number(s.netSale||s.total).toLocaleString()}${s.items.map((b,i) => `<div style="padding:6px;border-bottom:1px solid #eee">${i+1}. ${b.type} ${b.number} = ${Number(b.amount).toLocaleString()} ×${b.pay}</div>`).join("")}`;
-  };
+function openSlips(){
+  slipsModal.classList.add("show");
+  selectedSlipNo = null;
+  $("slipDetail").innerHTML = `<div style="padding:12px;color:#777;text-align:center">เลือกโพยที่ต้องการดู</div>`;
+  renderSlipsModal();
+}
 
-  window.deleteSlip = no => {
-    if(confirm(`ลบโพย ${currentHouse} ที่ ${no}?`)){
-      state().slips = slips().filter(s => s.no !== no);
-      saveAll();
-      renderSlipsModal();
-      $("slipDetail").innerHTML = "";
+window.viewSlip = no => {
+  selectedSlipNo = no;
+  renderSlipsModal();
+
+  const s = slips().find(x => x.no === no);
+  if(!s) return;
+
+  $("slipDetail").innerHTML = `<h3>${currentHouse} โพยที่ ${s.no} ${s.name}</h3>
+    <div>${s.date}</div>
+    <b>ยอดขาย ${Number(s.total).toLocaleString()} บาท</b><br>
+    หักคนหา ${Number(s.finderFee||0).toLocaleString()} (${s.finderRate||0}%)<br>
+    ยอดหลังหัก ${Number(s.netSale||s.total).toLocaleString()}
+    ${s.items.map((b,i) => `<div style="padding:6px;border-bottom:1px solid #eee">${i+1}. ${b.type} ${b.number} = ${Number(b.amount).toLocaleString()} ×${b.pay}</div>`).join("")}`;
+};
+
+window.deleteSlip = no => {
+  if(confirm(`ลบโพย ${currentHouse} ที่ ${no}?`)){
+    state().slips = slips().filter(s => s.no !== no);
+    if(selectedSlipNo === no){
+      selectedSlipNo = null;
+      $("slipDetail").innerHTML = `<div style="padding:12px;color:#777;text-align:center">เลือกโพยที่ต้องการดู</div>`;
     }
-  };
-
-  function renderSlipsModal(){
-    $("slipsList").innerHTML = slips().length ? slips().slice().reverse().map(s => `
-      <div class="slipItem"><div><b>${currentHouse} โพยที่ ${s.no}</b> ${s.name}<br>${s.date}<br>${s.items.length} รายการ / ${Number(s.total).toLocaleString()} บาท</div><div><button style="background:#1679f2" onclick="viewSlip(${s.no})">ดู</button><button onclick="deleteSlip(${s.no})">ลบ</button></div></div>
-    `).join("") : `ยังไม่มีโพยที่ส่งของ ${currentHouse}`;
+    saveAll();
+    renderSlipsModal();
   }
+};
 
+function renderSlipsModal(){
+  $("slipsList").innerHTML = slips().length ? slips().slice().reverse().map(s => `
+    <div class="slipItem" style="${selectedSlipNo === s.no ? 'background:#fff5d6;border-radius:8px;padding:8px' : ''}">
+      <div>
+        <b>${currentHouse} โพยที่ ${s.no}</b> ${s.name}<br>
+        ${s.date}<br>
+        ${s.items.length} รายการ / ${Number(s.total).toLocaleString()} บาท
+      </div>
+      <div>
+        <button style="background:#1679f2" onclick="viewSlip(${s.no})">ดู</button>
+        <button onclick="deleteSlip(${s.no})">ลบ</button>
+      </div>
+    </div>
+  `).join("") : `ยังไม่มีโพยที่ส่งของ ${currentHouse}`;
+}
   function order(type){
     const list = ["สองตัวบน","สองตัวล่าง","สามตัวบน","สามตัวโต๊ด","หกกลับบน","หกกลับล่าง"];
     const idx = list.indexOf(type);
