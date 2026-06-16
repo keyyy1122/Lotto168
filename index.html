@@ -715,33 +715,44 @@ button{cursor:pointer}
 
 function openSlips(){
   slipsModal.classList.add("show");
-  selectedSlipNo = null;
-  $("slipDetail").innerHTML = `<div style="padding:12px;color:#777;text-align:center">เลือกโพยที่ต้องการดู</div>`;
+  $("slipsList").style.display = "block";
+  $("slipDetail").style.display = "none";
+  $("slipDetail").innerHTML = "";
   renderSlipsModal();
 }
 
 window.viewSlip = no => {
-  selectedSlipNo = no;
-  renderSlipsModal();
-
   const s = slips().find(x => x.no === no);
   if(!s) return;
 
-  $("slipDetail").innerHTML = `<h3>${currentHouse} โพยที่ ${s.no} ${s.name}</h3>
+  $("slipsList").style.display = "none";
+  $("slipDetail").style.display = "block";
+
+  $("slipDetail").innerHTML = `
+    <button class="action" onclick="backToSlipList()">← กลับไปหน้าโพย</button>
+
+    <h3>${currentHouse} โพยที่ ${s.no} ${s.name}</h3>
     <div>${s.date}</div>
     <b>ยอดขาย ${Number(s.total).toLocaleString()} บาท</b><br>
     หักคนหา ${Number(s.finderFee||0).toLocaleString()} (${s.finderRate||0}%)<br>
     ยอดหลังหัก ${Number(s.netSale||s.total).toLocaleString()}
-    ${s.items.map((b,i) => `<div style="padding:6px;border-bottom:1px solid #eee">${i+1}. ${b.type} ${b.number} = ${Number(b.amount).toLocaleString()} ×${b.pay}</div>`).join("")}`;
+
+    ${s.items.map((b,i) => `
+      <div style="padding:6px;border-bottom:1px solid #eee">
+        ${i+1}. ${b.type} ${b.number} = ${Number(b.amount).toLocaleString()} ×${b.pay}
+      </div>
+    `).join("")}
+  `;
+};
+
+window.backToSlipList = () => {
+  $("slipDetail").style.display = "none";
+  $("slipsList").style.display = "block";
 };
 
 window.deleteSlip = no => {
   if(confirm(`ลบโพย ${currentHouse} ที่ ${no}?`)){
     state().slips = slips().filter(s => s.no !== no);
-    if(selectedSlipNo === no){
-      selectedSlipNo = null;
-      $("slipDetail").innerHTML = `<div style="padding:12px;color:#777;text-align:center">เลือกโพยที่ต้องการดู</div>`;
-    }
     saveAll();
     renderSlipsModal();
   }
@@ -749,7 +760,7 @@ window.deleteSlip = no => {
 
 function renderSlipsModal(){
   $("slipsList").innerHTML = slips().length ? slips().slice().reverse().map(s => `
-    <div class="slipItem" style="${selectedSlipNo === s.no ? 'background:#fff5d6;border-radius:8px;padding:8px' : ''}">
+    <div class="slipItem">
       <div>
         <b>${currentHouse} โพยที่ ${s.no}</b> ${s.name}<br>
         ${s.date}<br>
